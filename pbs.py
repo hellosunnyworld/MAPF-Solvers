@@ -6,11 +6,12 @@ import copy
 from single_agent_planner import compute_heuristics, a_star, get_location, get_sum_of_cost
 from topological_sort import TopologyGraph
 from cbs import detect_collisions_among_all_paths
+from prioritized import build_constraint_table
 
 
 def generate_priority_pairs(collision):
 
-    priority_pairs = []
+    priority_pairs = [(collision['a1'], collision['a2']), (collision['a2'], collision['a1'])]
 
     ##############################
     # TODO Task 4.1: Generate list of priority pairs based on the given collision
@@ -109,7 +110,23 @@ class PBSSolver(object):
     def update_plan(self,node,i):
         
         # Task 4.2 TODO : Refer to the given psuedocode or the cited paper for more details on what this function does
-        
+        order = (get_lower_priority_agents(node['priority_pairs'], i))
+
+        for j in order:
+            AH = get_higher_priority_agents(node['priority_pairs'], j)
+            AH = AH[1:]
+            print(AH)
+            print(order)
+            if collide_with_higher_priority_agents(node, j):
+                constraints = []
+                for k in AH:
+                    build_constraint_table(constraints, node['paths'][k])
+                print(constraints)
+                path_j = a_star(self.my_map, self.starts[j], self.goals[j], self.heuristics[j], j, constraints)
+                if not path_j:
+                    return False
+                node['paths'][j] = path_j
+
         return True
 
 
@@ -130,13 +147,13 @@ class PBSSolver(object):
         ##############################
         # Task 4.2: Initialize the root node dict, what will be the initial priority pairs for standard PBS?
         #      
-        root = # TODO
+        root = {'cost': 0, 'priority_pairs': [], 'paths': [], 'collisions': []} # TODO
 
         ##############################
         # Task 4.2: Find initial path for each agent
         #   
         for i in range(self.num_of_agents):  
-            self.update_plan(root,i)
+            root['paths'].append(a_star(self.my_map, self.starts[i], self.goals[i], self.heuristics[i], i, []))
 
         root['cost'] = get_sum_of_cost(root['paths'])
         root['collisions'] = detect_collisions_among_all_paths(root['paths'])
@@ -144,6 +161,7 @@ class PBSSolver(object):
         ##############################
         # Task 4.2: Add root to search stack
         # TODO
+        self.push_node_to_stack(root)
 
 
         while len(self.search_stack)>0:
@@ -151,7 +169,8 @@ class PBSSolver(object):
             ##############################
             # Task 4.2: Get next node from stack
             #     
-            next_node = #TODO
+            children = []
+            next_node = self.pop_node_from_stack() #TODO
 
             # print expanded node info
             print("Expanded node cost: {} priority {} collisions {}".format(next_node['cost'],(next_node['priority_pairs']),(next_node['collisions'])))
@@ -179,7 +198,9 @@ class PBSSolver(object):
                 # - If priority pair already exists in parent node, skip this child
                 # - Else add priority pair to child priority pairs
                 # TODO
-
+                if priority_pair in next_node['priority_pairs']:
+                    continue
+                child['priority_pairs'].append(priority_pair)
                 ##############################
                 # Task 4.2:  Replan for all agents in topological order
                 #     
@@ -188,12 +209,21 @@ class PBSSolver(object):
                 if update_success:
                     child['cost'] = get_sum_of_cost(child['paths'])
                     child['collisions'] = detect_collisions_among_all_paths(child['paths'])
+                    children.append(child)
 
             
             ##############################
             # Task 4.2:  # Add nodes to stack from heap in non increasing order of cost
             # TODO
-
+            if len(children) == 2:
+                if children[0]['cost'] > children[1]['cost']:
+                    self.push_node_to_stack(children[0])
+                    self.push_node_to_stack(children[1])
+                else:
+                    self.push_node_to_stack(children[1])
+                    self.push_node_to_stack(children[0])
+            elif len(children) == 1:
+                self.push_node_to_stack(children[0])
         return None
 
 

@@ -32,14 +32,17 @@ class JointStateSolver(object):
         ##############################
         # Task 1.1: Read function prototype and call joint_state_a_star here
 
-        path = # TODO
+        path = joint_state_a_star(self.my_map, self.starts, self.goals, self.heuristics, self.num_of_agents)
 
         if path is None:
             return None
                 
         # Task 1.1: Convert the joint state path to a list of paths for each agent
         # TODO
-
+        result = [[],[]]
+        for v in path:
+            for i in range(self.num_of_agents):
+                result[i].append(v[i])
         ##############################
 
         self.CPU_time = timer.time() - start_time
