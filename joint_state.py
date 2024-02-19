@@ -33,7 +33,7 @@ class JointStateSolver(object):
         # Task 1.1: Read function prototype and call joint_state_a_star here
 
         path = joint_state_a_star(self.my_map, self.starts, self.goals, self.heuristics, self.num_of_agents)
-
+        print('path', path)
         if path is None:
             return None
                 

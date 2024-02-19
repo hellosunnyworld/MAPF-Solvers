@@ -17,6 +17,7 @@ def generate_motions_recursive(num_agents,cur_agent):
     # Use combinations from itertools to choose two items without considering order
 
     joint_state_motions = list(product(list(range(len(directions))), repeat=num_agents))
+    joint_state_motions.remove(tuple([4]*num_agents))
 
     return joint_state_motions
 
@@ -26,14 +27,15 @@ def is_valid_motion(old_loc, new_loc):
     # Task 1.3/1.4: Check if a move from old_loc to new_loc is valid
     # Check if two agents are in the same location (vertex collision)
     # TODO
-    if new_loc[0][0] == new_loc[1][0] and new_loc[0][1] == new_loc[1][1]:
-        return False
+    for i in range(len(new_loc)):
+        for j in range(i + 1, len(new_loc)):
+            if all_eq(new_loc[i], new_loc[j]):
+                return False
 
-    # Check edge collision
-    # TODO
-    if new_loc[0][0] == old_loc[1][0] and new_loc[0][1] == old_loc[1][1] and \
-        old_loc[0][0] == new_loc[1][0] and old_loc[0][1] == new_loc[1][1]:
-        return False
+            # Check edge collision
+            # TODO
+            if all_eq(old_loc[i], new_loc[j]) and all_eq(old_loc[j], new_loc[i]):
+                return False
     return True
 
 def get_sum_of_cost(paths):
@@ -280,6 +282,7 @@ def joint_state_a_star(my_map, starts, goals, h_values, num_agents):
     closed_list = dict()
     earliest_goal_timestep = 0
     h_value = 0
+    a_stars = 0
      ##############################
     # Task 1.1: Iterate through starts and use list of h_values to calculate total h_value for root node
     #
@@ -304,6 +307,10 @@ def joint_state_a_star(my_map, starts, goals, h_values, num_agents):
         
         if curr['loc'] == goals:
             return get_path(curr)
+        
+        print(get_path(curr), '\n\n\n\n\n')
+        # if a_stars >= 500:
+        #     return None
 
         for dir in directions:
             
@@ -324,7 +331,7 @@ def joint_state_a_star(my_map, starts, goals, h_values, num_agents):
                 if my_map[child_loc[i][0]][child_loc[i][1]]:
                     valid_move = False
                     break
-                
+
             if not valid_move:
                 continue
              ##############################
@@ -342,6 +349,7 @@ def joint_state_a_star(my_map, starts, goals, h_values, num_agents):
                 h_value += h_values[i][child_loc[i]]
 
             # Create child node
+            a_stars += 1
             child = {'loc': child_loc,
                     'g_val': curr['g_val'] + num_agents,
                     'h_val': h_value,
