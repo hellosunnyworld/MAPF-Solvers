@@ -39,9 +39,9 @@ class JointStateSolver(object):
                 
         # Task 1.1: Convert the joint state path to a list of paths for each agent
         # TODO
-        result = [[],[]]
-        for v in path:
-            for i in range(self.num_of_agents):
+        for i in range(self.num_of_agents):
+            result.append([])
+            for v in path:
                 result[i].append(v[i])
         ##############################
 
