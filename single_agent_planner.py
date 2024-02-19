@@ -39,11 +39,16 @@ def is_valid_motion(old_loc, new_loc):
 
 def get_sum_of_cost(paths):
     rst = 0
+    extra_deduction = 0
     if paths is None:
         return -1
     for path in paths:
         rst += len(path) - 1
-    return rst
+        for i in range(1, len(path)):
+            if not all_eq(path[-i - 1], path[-1]):
+                extra_deduction += (i - 1)
+                break
+    return rst - extra_deduction
 
 
 def compute_heuristics(my_map, goal):
