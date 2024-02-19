@@ -93,6 +93,7 @@ class PBSSolver(object):
         # Push node to search stack
         if len(self.search_stack) == 0:
             self.search_stack.append(node)
+            self.num_of_generated += 1
             return
 
         index = 0
@@ -181,7 +182,7 @@ class PBSSolver(object):
             next_node = self.pop_node_from_stack() #TODO
 
             # print expanded node info
-            #print("Expanded node cost: {} priority {} collisions {}".format(next_node['cost'],(next_node['priority_pairs']),(next_node['collisions'])))
+            print("Expanded node cost: {} priority {} collisions {}".format(next_node['cost'],(next_node['priority_pairs']),(next_node['collisions'])))
 
             if len(next_node['collisions']) == 0 or self.a_stars >= 500:
                 self.print_results(next_node)
