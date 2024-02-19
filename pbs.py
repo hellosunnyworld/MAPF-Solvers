@@ -102,10 +102,12 @@ class PBSSolver(object):
                 break
         
         self.search_stack.insert(index, node)
+        self.num_of_generated += 1
 
     def pop_node_from_stack(self):
         # Pop node from search stack
         node = self.search_stack.popleft()
+        self.num_of_expanded += 1
         return node
 
     def update_plan(self,node,i):
