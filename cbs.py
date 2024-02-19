@@ -152,7 +152,7 @@ class CBSSolver(object):
 
             print('*********************')
             print('newly popped costs', curr['cost'])
-            if curr['collisions'] == [] or a_stars >= 500:
+            if curr['collisions'] == []:
                 self.print_results(curr)
                 return curr['paths']
             print('HAVE COLLISIONS', curr['collisions'])
