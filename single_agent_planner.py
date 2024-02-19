@@ -282,7 +282,6 @@ def joint_state_a_star(my_map, starts, goals, h_values, num_agents):
     closed_list = dict()
     earliest_goal_timestep = 0
     h_value = 0
-    a_stars = 0
      ##############################
     # Task 1.1: Iterate through starts and use list of h_values to calculate total h_value for root node
     #
@@ -309,8 +308,6 @@ def joint_state_a_star(my_map, starts, goals, h_values, num_agents):
             return get_path(curr)
         
         print(get_path(curr), '\n\n\n\n\n')
-        # if a_stars >= 500:
-        #     return None
 
         for dir in directions:
             
@@ -349,7 +346,6 @@ def joint_state_a_star(my_map, starts, goals, h_values, num_agents):
                 h_value += h_values[i][child_loc[i]]
 
             # Create child node
-            a_stars += 1
             child = {'loc': child_loc,
                     'g_val': curr['g_val'] + num_agents,
                     'h_val': h_value,

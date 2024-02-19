@@ -25,7 +25,7 @@ def get_lower_priority_agents(priority_pairs, agent):
 
     # construct graph
     for pair in priority_pairs:
-        tg.Edge(pair[0], pair[1])
+        tg.Edge(pair[0], pair[1]) # higher to lower
 
     if not tg.has_node(agent):
         return [agent]
@@ -39,7 +39,7 @@ def get_higher_priority_agents(priority_pairs, agent):
 
     # construct graph
     for pair in priority_pairs:
-        tg.Edge(pair[1], pair[0])
+        tg.Edge(pair[1], pair[0]) # lower to higher
 
     if not tg.has_node(agent):
         return [agent]
@@ -82,6 +82,7 @@ class PBSSolver(object):
         self.num_of_expanded = 0
         self.CPU_time = 0
         self.search_stack = deque()
+        self.a_stars = 0
 
         # compute heuristics for the low-level search
         self.heuristics = []
@@ -111,18 +112,21 @@ class PBSSolver(object):
         
         # Task 4.2 TODO : Refer to the given psuedocode or the cited paper for more details on what this function does
         order = (get_lower_priority_agents(node['priority_pairs'], i))
+        #print('\n\n\n')
+        #print(node['priority_pairs'])
+        #print(order, '\n')
 
         for j in order:
             AH = get_higher_priority_agents(node['priority_pairs'], j)
             AH = AH[1:]
-            print(AH)
-            print(order)
+            #print(AH, '\n')
             if collide_with_higher_priority_agents(node, j):
                 constraints = []
                 for k in AH:
                     build_constraint_table(constraints, node['paths'][k])
-                print(constraints)
+                #print(constraints)
                 path_j = a_star(self.my_map, self.starts[j], self.goals[j], self.heuristics[j], j, constraints)
+                self.a_stars += 1
                 if not path_j:
                     return False
                 node['paths'][j] = path_j
@@ -137,6 +141,7 @@ class PBSSolver(object):
 
         print('Start PBS')
         self.start_time = timer.time()
+
 
         # Generate the root node
         # priority_pairs   - list of priority pairs
@@ -154,6 +159,7 @@ class PBSSolver(object):
         #   
         for i in range(self.num_of_agents):  
             root['paths'].append(a_star(self.my_map, self.starts[i], self.goals[i], self.heuristics[i], i, []))
+            self.a_stars += 1
 
         root['cost'] = get_sum_of_cost(root['paths'])
         root['collisions'] = detect_collisions_among_all_paths(root['paths'])
@@ -173,9 +179,9 @@ class PBSSolver(object):
             next_node = self.pop_node_from_stack() #TODO
 
             # print expanded node info
-            print("Expanded node cost: {} priority {} collisions {}".format(next_node['cost'],(next_node['priority_pairs']),(next_node['collisions'])))
+            #print("Expanded node cost: {} priority {} collisions {}".format(next_node['cost'],(next_node['priority_pairs']),(next_node['collisions'])))
 
-            if len(next_node['collisions']) == 0:
+            if len(next_node['collisions']) == 0 or self.a_stars >= 500:
                 self.print_results(next_node)
                 return next_node['paths']
 
@@ -198,9 +204,10 @@ class PBSSolver(object):
                 # - If priority pair already exists in parent node, skip this child
                 # - Else add priority pair to child priority pairs
                 # TODO
-                if priority_pair in next_node['priority_pairs']:
+                if (priority_pair in next_node['priority_pairs']) or ((priority_pair[1], priority_pair[0]) in next_node['priority_pairs']):
                     continue
                 child['priority_pairs'].append(priority_pair)
+                #print(child['priority_pairs'])
                 ##############################
                 # Task 4.2:  Replan for all agents in topological order
                 #     

@@ -117,9 +117,11 @@ class CBSSolver(object):
                 'paths': [],
                 'collisions': []}
         root = deepcopy(new_node)
+        a_stars = 0
         for i in range(self.num_of_agents):  # Find initial path for each agent
             path = a_star(self.my_map, self.starts[i], self.goals[i], self.heuristics[i],
                           i, root['constraints'])
+            a_stars += 1
             if path is None:
                 raise BaseException('No solutions')
             root['paths'].append(path)
@@ -150,7 +152,7 @@ class CBSSolver(object):
 
             print('*********************')
             print('newly popped costs', curr['cost'])
-            if curr['collisions'] == []:
+            if curr['collisions'] == [] or a_stars >= 500:
                 self.print_results(curr)
                 return curr['paths']
             print('HAVE COLLISIONS', curr['collisions'])
@@ -179,6 +181,7 @@ class CBSSolver(object):
 
                 path = a_star(self.my_map, self.starts[n], self.goals[n], self.heuristics[n],
                             n, low_level_constr, cbs=self.num_of_agents)
+                a_stars += 1
                 if path is None:
                     print('CHILD FAILS')
                     continue
