@@ -1,5 +1,5 @@
 import heapq
-from itertools import permutations
+from itertools import product
 
 def move(loc, dir):
     directions = [(0, -1), (1, 0), (0, 1), (-1, 0), (0, 0)]
@@ -15,11 +15,10 @@ def move_joint_state(locs, dir):
 def generate_motions_recursive(num_agents,cur_agent):
     directions = [(0, -1), (1, 0), (0, 1), (-1, 0), (0, 0)]
     # Use combinations from itertools to choose two items without considering order
-    combos = list(permutations(list(range(len(directions))), num_agents))
-    print(combos)
-    joint_state_motions = [list(combo) for combo in combos]
 
-    return joint_state_motions + [[0]*num_agents,[1]*num_agents,[2]*num_agents]
+    joint_state_motions = list(product(list(range(len(directions))), repeat=num_agents))
+
+    return joint_state_motions
 
 
 def is_valid_motion(old_loc, new_loc):
@@ -321,7 +320,11 @@ def joint_state_a_star(my_map, starts, goals, h_values, num_agents):
             #
             valid_move = True
             # TODO
-            valid_move = not (my_map[child_loc[0][0]][child_loc[0][1]] or my_map[child_loc[1][0]][child_loc[1][1]])
+            for i in range(num_agents):
+                if my_map[child_loc[i][0]][child_loc[i][1]]:
+                    valid_move = False
+                    break
+                
             if not valid_move:
                 continue
              ##############################
